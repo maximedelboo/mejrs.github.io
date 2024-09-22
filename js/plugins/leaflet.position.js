@@ -17,7 +17,7 @@ import "../leaflet.js";
     L.Control.Position = L.Control.extend({
         options: {
             position: 'topleft',
-            separator: '_',
+            separator: ',',
             emptyString: 'Unavailable',
             prefix: "",
             flyDuration: 3, //seconds
@@ -170,11 +170,11 @@ import "../leaflet.js";
 
         createString: function (...args) {
             if (typeof args[0] === "number") {
-                return args.join(this.options.separator);
+                return '[' + args.join(this.options.separator) + ']';
             }
             if (typeof args[0] === "object") {
                 let coord = args[0];
-                return [coord.plane, coord.i, coord.j, coord.x, coord.y, coord.globalX, coord.globalY].filter(item => item !== undefined).join(this.options.separator);
+                return '[' + [coord.plane, coord.i, coord.j, coord.x, coord.y, coord.globalX, coord.globalY].filter(item => item !== undefined).join(this.options.separator) + ']';
             }
         },
         _containerPointCache: {
@@ -189,10 +189,12 @@ import "../leaflet.js";
         },
         redrawRect: function () {
             let position = this._map.containerPointToLatLng(this._containerPointCache);
+            // this.globalX = parseInt(position.lng)*4 + this._map._plane*13056 - 4096;
+            // this.globalY = 197*256 - parseInt(position.lat) * 4 - 2;
             this.globalX = parseInt(position.lng);
             this.globalY = parseInt(position.lat);
             let jCoord = this.createString(this.convert(this._map._plane, this.globalX, this.globalY));
-            let pxyCoord = this.createString(this._map._plane, this.globalX, this.globalY);
+            let pxyCoord = this.createString(parseInt(position.lng)*4 + this._map._plane*13056 - 4096, 197*256 - parseInt(position.lat) * 4 - 2);
             this._container.innerHTML = jCoord + "<br>" + pxyCoord;
             this._rect.setBounds([[this.globalY, this.globalX], [this.globalY + 1, this.globalX + 1]])
 
